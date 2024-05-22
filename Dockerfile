@@ -12,4 +12,4 @@ RUN go install github.com/cosmtrek/air@latest
 
 EXPOSE 5050
 
-CMD ["air", "-c", ".air.toml"]
+CMD ["air"]
