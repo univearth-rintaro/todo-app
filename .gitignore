@@ -1,0 +1,10 @@
+tmp
+.gcp
+log.txt
+
+# docker volumes
+db-store
+.localstack
+
+# mutable cognito local data
+e2e/testdata/cognito/db
