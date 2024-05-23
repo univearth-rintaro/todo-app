@@ -3,6 +3,7 @@ package middleware
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 )
@@ -12,11 +13,16 @@ func LoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			start := time.Now()
 
+			traceID := uuid.New().String()
+
+			c.Set("traceID", traceID)
+
 			err := next(c)
 
 			stop := time.Now()
 
 			fields := []zap.Field{
+				zap.String("trace_id", traceID),
 				zap.String("method", c.Request().Method),
 				zap.String("uri", c.Request().RequestURI),
 				zap.String("remote_ip", c.RealIP()),
