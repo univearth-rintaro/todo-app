@@ -36,17 +36,14 @@ func main() {
 
 	server := echo.New()
 
-	// 構造化ログを出力するためのミドルウェアを追加
 	server.Use(customMiddleware.LoggerMiddleware(logger))
 	server.Use(echoMiddleware.Recover())
 
-	// CORS設定
 	server.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000"},
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
-	// APIのハンドラを設定
 	apiServer := &handlers.Server{}
 	api.RegisterHandlers(server, apiServer)
 
