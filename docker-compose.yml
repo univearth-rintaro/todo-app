@@ -12,10 +12,19 @@ services:
     ports:
       - "5432:5432"
 
+  postgres_test:
+    container_name: todo-test-db
+    image: 'postgres:latest'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todo_test
+
   api:
     container_name: todo-api
     build:
       context: .
+      target: dev
     volumes:
       - .:/app
     ports:
@@ -24,6 +33,19 @@ services:
       - ./env/api.env
     depends_on:
       - postgres
+      - postgres_test
+
+  tester:
+    container_name: todo-tester
+    build:
+      context: .
+      target: tester
+    volumes:
+      - .:/app
+    env_file:
+      - ./env/api.env
+    depends_on:
+      - postgres_test
 
 volumes:
   todo_db_data:

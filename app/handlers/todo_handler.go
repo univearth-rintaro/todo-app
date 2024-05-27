@@ -5,14 +5,16 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/univearth-rintaro/todo-app/api"
-	"github.com/univearth-rintaro/todo-app/db"
+	"gorm.io/gorm"
 )
 
-type Server struct{}
+type Server struct {
+	DB *gorm.DB
+}
 
 func (s *Server) GetTodos(ctx echo.Context) error {
 	todos := []api.Todo{}
-	if err := db.DB.Find(&todos).Error; err != nil {
+	if err := s.DB.Find(&todos).Error; err != nil {
 		return handleError(ctx, http.StatusInternalServerError, err)
 	}
 	return ctx.JSON(http.StatusOK, todos)
@@ -23,7 +25,7 @@ func (s *Server) PostTodos(ctx echo.Context) error {
 	if err := ctx.Bind(&todo); err != nil {
 		return handleError(ctx, http.StatusBadRequest, err)
 	}
-	if err := db.DB.Create(&todo).Error; err != nil {
+	if err := s.DB.Create(&todo).Error; err != nil {
 		return handleError(ctx, http.StatusInternalServerError, err)
 	}
 	return ctx.JSON(http.StatusCreated, todo)
@@ -31,7 +33,7 @@ func (s *Server) PostTodos(ctx echo.Context) error {
 
 func (s *Server) GetTodosId(ctx echo.Context, id int) error {
 	var todo api.Todo
-	if err := db.DB.First(&todo, id).Error; err != nil {
+	if err := s.DB.First(&todo, id).Error; err != nil {
 		return handleError(ctx, http.StatusInternalServerError, err)
 	}
 	return ctx.JSON(http.StatusOK, todo)
@@ -42,14 +44,14 @@ func (s *Server) PutTodosId(ctx echo.Context, id int) error {
 	if err := ctx.Bind(&todo); err != nil {
 		return handleError(ctx, http.StatusBadRequest, err)
 	}
-	if err := db.DB.Model(&api.Todo{}).Where("id = ?", id).Updates(todo).Error; err != nil {
+	if err := s.DB.Model(&api.Todo{}).Where("id = ?", id).Updates(todo).Error; err != nil {
 		return handleError(ctx, http.StatusInternalServerError, err)
 	}
 	return ctx.JSON(http.StatusOK, todo)
 }
 
 func (s *Server) DeleteTodosId(ctx echo.Context, id int) error {
-	if err := db.DB.Delete(&api.Todo{}, id).Error; err != nil {
+	if err := s.DB.Delete(&api.Todo{}, id).Error; err != nil {
 		return handleError(ctx, http.StatusInternalServerError, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -57,12 +59,12 @@ func (s *Server) DeleteTodosId(ctx echo.Context, id int) error {
 
 func (s *Server) PatchTodosIdDone(ctx echo.Context, id int) error {
 	var todo api.Todo
-	if err := db.DB.First(&todo, id).Error; err != nil {
+	if err := s.DB.First(&todo, id).Error; err != nil {
 		return handleError(ctx, http.StatusInternalServerError, err)
 	}
 	done := true
 	todo.Done = &done
-	if err := db.DB.Save(&todo).Error; err != nil {
+	if err := s.DB.Save(&todo).Error; err != nil {
 		return handleError(ctx, http.StatusInternalServerError, err)
 	}
 	return ctx.JSON(http.StatusOK, todo)
